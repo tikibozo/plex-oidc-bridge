@@ -7,6 +7,7 @@ import (
 	"crypto/subtle"
 	"encoding/base64"
 	"encoding/json"
+	"encoding/xml"
 	"fmt"
 	"html"
 	"io"
@@ -58,6 +59,7 @@ var (
 	rateLimitWindow   = time.Minute
 	rateLimiters      = make(map[string]*rateLimiter)
 	trustProxyHeaders bool
+	friendFilterInst  *friendFilter
 )
 
 type OIDCSession struct {
@@ -138,7 +140,24 @@ func main() {
 		log.Println("TRUST_PROXY_HEADERS enabled: respecting X-Forwarded-For and X-Real-IP")
 	}
 
-	// 5. Start cleanup ticker for expired sessions/codes
+	// 5. Initialize optional Plex friend filter
+	plexToken := normalizeInputString(os.Getenv("PLEX_SERVER_TOKEN"))
+	plexServerID := normalizeInputString(os.Getenv("PLEX_SERVER_ID"))
+	friendTTL := time.Duration(loadTTLSeconds("PLEX_FRIEND_CACHE_TTL_SECONDS", 300)) * time.Second
+	ff, err := newFriendFilter(plexToken, plexServerID, friendTTL)
+	if err != nil {
+		log.Fatalf("Failed to initialize Plex friend filter: %v", err)
+	}
+	friendFilterInst = ff
+	if friendFilterInst != nil {
+		if err := friendFilterInst.refresh(); err != nil {
+			log.Printf("WARNING: initial friend list fetch failed: %v (auth will 503 until Plex API reachable)", err)
+		}
+	} else {
+		log.Println("Plex friend filter disabled (PLEX_SERVER_TOKEN not set)")
+	}
+
+	// 6. Start cleanup ticker for expired sessions/codes
 	go startCleanupTicker()
 
 	http.HandleFunc("/.well-known/openid-configuration", handleDiscovery)
@@ -368,6 +387,19 @@ func loadTTL(envName string, defaultMinutes int) time.Duration {
 		return time.Duration(defaultMinutes) * time.Minute
 	}
 	return time.Duration(mins) * time.Minute
+}
+
+func loadTTLSeconds(envName string, defaultSeconds int) int {
+	val := os.Getenv(envName)
+	if val == "" {
+		return defaultSeconds
+	}
+	secs, err := strconv.Atoi(val)
+	if err != nil || secs <= 0 {
+		log.Printf("Invalid %s=%s, defaulting to %d seconds", envName, val, defaultSeconds)
+		return defaultSeconds
+	}
+	return secs
 }
 
 func startCleanupTicker() {
@@ -888,6 +920,22 @@ func handleCallback(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// 4b. Optional Plex server friend check
+	if friendFilterInst != nil {
+		allowed, ferr := friendFilterInst.isAllowed(user.ID)
+		if ferr != nil {
+			log.Printf("Friend check error for user %s (%d): %v", user.Username, user.ID, ferr)
+			http.Error(w, "Auth check unavailable", http.StatusServiceUnavailable)
+			return
+		}
+		if !allowed {
+			log.Printf("Rejecting Plex user %s (id=%d): not shared on this server", user.Username, user.ID)
+			http.Error(w, "Access denied: your Plex account is not a shared user on this server", http.StatusForbidden)
+			return
+		}
+		log.Printf("Allowing Plex user %s (id=%d)", user.Username, user.ID)
+	}
+
 	// 5. Generate Internal Auth Code
 	authCode := generateRandomString(32)
 	sessionMutex.Lock()
@@ -963,6 +1011,150 @@ func getUserDetails(token string) (*UserResponse, error) {
 	}
 
 	return &userResp, nil
+}
+
+// -----------------------------------------------------------------------------
+// Plex Server Friend Filter
+// -----------------------------------------------------------------------------
+
+type plexSharedServer struct {
+	UserID   int    `xml:"userID,attr"`
+	Username string `xml:"username,attr"`
+	Email    string `xml:"email,attr"`
+}
+
+type plexSharedServersResp struct {
+	XMLName xml.Name           `xml:"MediaContainer"`
+	Shared  []plexSharedServer `xml:"SharedServer"`
+}
+
+type friendFilter struct {
+	mu          sync.RWMutex
+	ownerToken  string
+	machineID   string
+	ownerUserID int
+	allowedIDs  map[int]struct{}
+	loaded      bool
+	fetchedAt   time.Time
+	ttl         time.Duration
+}
+
+func newFriendFilter(token, machineID string, ttl time.Duration) (*friendFilter, error) {
+	if token == "" {
+		return nil, nil
+	}
+	if machineID == "" {
+		return nil, fmt.Errorf("PLEX_SERVER_ID is required when PLEX_SERVER_TOKEN is set")
+	}
+	ff := &friendFilter{
+		ownerToken: token,
+		machineID:  machineID,
+		allowedIDs: make(map[int]struct{}),
+		ttl:        ttl,
+	}
+	ownerID, err := ff.fetchOwnerID()
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve Plex owner ID: %w", err)
+	}
+	ff.ownerUserID = ownerID
+	log.Printf("Friend filter enabled: server=%s, owner Plex ID=%d, cache TTL=%s", machineID, ownerID, ttl)
+	return ff, nil
+}
+
+func (f *friendFilter) fetchOwnerID() (int, error) {
+	client := &http.Client{Timeout: 10 * time.Second}
+	req, err := http.NewRequest("GET", plexAPIBaseURL+"/user", nil)
+	if err != nil {
+		return 0, err
+	}
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("X-Plex-Product", productName)
+	req.Header.Set("X-Plex-Version", productVersion)
+	req.Header.Set("X-Plex-Client-Identifier", clientID)
+	req.Header.Set("X-Plex-Token", f.ownerToken)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return 0, err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		io.Copy(io.Discard, resp.Body)
+		return 0, fmt.Errorf("plex /user returned %d", resp.StatusCode)
+	}
+	var u UserResponse
+	if err := json.NewDecoder(resp.Body).Decode(&u); err != nil {
+		return 0, err
+	}
+	if u.ID == 0 {
+		return 0, fmt.Errorf("plex /user returned empty id")
+	}
+	return u.ID, nil
+}
+
+func (f *friendFilter) refresh() error {
+	client := &http.Client{Timeout: 10 * time.Second}
+	endpoint := fmt.Sprintf("https://plex.tv/api/servers/%s/shared_servers", url.PathEscape(f.machineID))
+	req, err := http.NewRequest("GET", endpoint, nil)
+	if err != nil {
+		return err
+	}
+	req.Header.Set("Accept", "application/xml")
+	req.Header.Set("X-Plex-Product", productName)
+	req.Header.Set("X-Plex-Version", productVersion)
+	req.Header.Set("X-Plex-Client-Identifier", clientID)
+	req.Header.Set("X-Plex-Token", f.ownerToken)
+
+	resp, err := client.Do(req)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		io.Copy(io.Discard, resp.Body)
+		return fmt.Errorf("shared_servers returned %d", resp.StatusCode)
+	}
+	var parsed plexSharedServersResp
+	if err := xml.NewDecoder(resp.Body).Decode(&parsed); err != nil {
+		return fmt.Errorf("parse shared_servers: %w", err)
+	}
+	ids := make(map[int]struct{}, len(parsed.Shared))
+	for _, s := range parsed.Shared {
+		if s.UserID != 0 {
+			ids[s.UserID] = struct{}{}
+		}
+	}
+	f.mu.Lock()
+	f.allowedIDs = ids
+	f.loaded = true
+	f.fetchedAt = time.Now()
+	f.mu.Unlock()
+	log.Printf("Friend filter refreshed: %d shared users on server %s", len(ids), f.machineID)
+	return nil
+}
+
+func (f *friendFilter) isAllowed(userID int) (bool, error) {
+	if userID != 0 && userID == f.ownerUserID {
+		return true, nil
+	}
+	f.mu.RLock()
+	stale := !f.loaded || time.Since(f.fetchedAt) > f.ttl
+	f.mu.RUnlock()
+	if stale {
+		if err := f.refresh(); err != nil {
+			f.mu.RLock()
+			hasCache := f.loaded
+			f.mu.RUnlock()
+			if !hasCache {
+				return false, fmt.Errorf("friend list unavailable: %w", err)
+			}
+			log.Printf("Friend filter refresh failed, serving stale cache: %v", err)
+		}
+	}
+	f.mu.RLock()
+	_, ok := f.allowedIDs[userID]
+	f.mu.RUnlock()
+	return ok, nil
 }
 
 func getBaseURL(r *http.Request) string {
