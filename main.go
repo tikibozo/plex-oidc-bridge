@@ -478,6 +478,12 @@ func clientIP(r *http.Request) string {
 }
 
 func sanitizeForLog(s string, max int) string {
+	s = strings.Map(func(r rune) rune {
+		if r == '\n' || r == '\r' || r == '\t' {
+			return '_'
+		}
+		return r
+	}, s)
 	if len(s) > max {
 		return s[:max] + "..."
 	}
