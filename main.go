@@ -29,16 +29,21 @@ import (
 )
 
 const (
-	plexAPIBaseURL = "https://plex.tv/api/v2"
-	productName    = "PlexOIDCBridge"
-	productVersion = "0.0.1"
-	clientID       = "plex-oidc-bridge-docker"
-	maxStateSize   = 4096
-	maxNonceSize   = 4096
-	maxSessions    = 1000
-	maxAuthCodes   = 1000
-	rateLimitBurst = 10
+	plexAPIBaseURL        = "https://plex.tv/api/v2"
+	defaultProductName    = "PlexOIDCBridge"
+	productVersion        = "0.0.1"
+	clientID              = "plex-oidc-bridge-docker"
+	maxStateSize          = 4096
+	maxNonceSize          = 4096
+	maxSessions           = 1000
+	maxAuthCodes          = 1000
+	rateLimitBurst        = 10
+	maxProductNameLen     = 64
 )
+
+// productName is the X-Plex-Product header value, shown in the Plex
+// "authorized devices" UI. Configurable via PLEX_PRODUCT_NAME.
+var productName = defaultProductName
 
 type Config struct {
 	ClientID     string   `json:"client_id"`
@@ -133,6 +138,15 @@ func main() {
 	// 3. Configure TTLs
 	sessionTTL = loadTTL("SESSION_TTL_MINUTES", 10)
 	authCodeTTL = loadTTL("AUTH_CODE_TTL_MINUTES", 10)
+
+	// 3b. Product name (shown in Plex "authorized devices" UI)
+	if pn := normalizeInputString(os.Getenv("PLEX_PRODUCT_NAME")); pn != "" {
+		if len(pn) > maxProductNameLen {
+			pn = pn[:maxProductNameLen]
+		}
+		productName = pn
+		log.Printf("PLEX_PRODUCT_NAME set: using %q as X-Plex-Product", productName)
+	}
 
 	// 4. Trust proxy headers if explicitly enabled
 	trustProxyHeaders = strings.EqualFold(normalizeInputString(os.Getenv("TRUST_PROXY_HEADERS")), "true")

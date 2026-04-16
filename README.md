@@ -130,6 +130,7 @@ Your OIDC endpoints are:
 | `PLEX_SERVER_TOKEN` | Env (Optional, this fork) | *(unset — filter disabled)* | Plex server **owner** auth token. When set, only users shared on the configured server (plus the owner) can authenticate. See [Friend filter](#friend-filter-this-fork). |
 | `PLEX_SERVER_ID` | Env (Required if `PLEX_SERVER_TOKEN` set, this fork) | - | The server's `machineIdentifier`. Used to query shared users for this specific server. |
 | `PLEX_FRIEND_CACHE_TTL_SECONDS` | Env (Optional, this fork) | `300` | How long to cache the shared-users list between Plex API refreshes. |
+| `PLEX_PRODUCT_NAME` | Env (Optional, this fork) | `PlexOIDCBridge` | Value sent as `X-Plex-Product` to the Plex API and shown to users in Plex's "authorized devices" UI during PIN sign-in. Set this to something recognizable (e.g. your site name) so users see a trusted label. Max 64 chars. |
 
 ### Persistence
 The bridge stores generated keys and configuration in `/app/config`. You should mount this volume to persist your RSA signing keys and Client credentials.
