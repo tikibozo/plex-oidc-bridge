@@ -2,7 +2,7 @@
 # Use a multi-stage build to keep the image small.
 
 # Stage 1: Build
-FROM golang:1.25.4-alpine AS builder
+FROM golang:1.25.9-alpine AS builder
 
 WORKDIR /app
 
@@ -18,7 +18,7 @@ RUN go mod tidy
 RUN CGO_ENABLED=0 GOOS=linux go build -o plex-oidc-bridge .
 
 # Stage 2: Runtime
-FROM alpine:3.21@sha256:c3f8e73fdb79deaebaa2037150150191b9dcbfba68b4a46d70103204c53f4709
+FROM alpine:3.21@sha256:48b0309ca019d89d40f670aa1bc06e426dc0931948452e8491e3d65087abc07d
 
 WORKDIR /app
 
