@@ -31,10 +31,10 @@ jobs:
   gosec:
     name: gosec (warn-only)
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: securego/gosec@master
+        continue-on-error: true
         with:
           args: ./...
 
