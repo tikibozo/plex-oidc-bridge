@@ -29,14 +29,13 @@ jobs:
           govulncheck ./...
 
   gosec:
-    name: gosec (warn-only)
+    name: gosec (HIGH)
     runs-on: ubuntu-latest
-    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: securego/gosec@master
         with:
-          args: ./...
+          args: -severity high ./...
 
   staticcheck:
     name: staticcheck (warn-only)
