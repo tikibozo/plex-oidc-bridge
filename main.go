@@ -31,7 +31,7 @@ import (
 const (
 	plexAPIBaseURL        = "https://plex.tv/api/v2"
 	defaultProductName    = "PlexOIDCBridge"
-	productVersion        = "0.0.1"
+	productVersion        = "0.0.0" // x-release-please-version
 	clientID              = "plex-oidc-bridge-docker"
 	maxStateSize          = 4096
 	maxNonceSize          = 4096
