@@ -2,7 +2,7 @@
 # Use a multi-stage build to keep the image small.
 
 # Stage 1: Build
-FROM golang:1.25.9-alpine AS builder
+FROM golang:1.25.10-alpine AS builder
 
 WORKDIR /app
 
