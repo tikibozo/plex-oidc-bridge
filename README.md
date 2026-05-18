@@ -11,8 +11,28 @@ This is a fork of [`blacktirion/plex-oidc-bridge`](https://github.com/blacktirio
 - **Security CI** — `govulncheck`, CodeQL (Go), `gitleaks`, `gosec`, `staticcheck`, and Trivy image scanning on push, PR, and weekly. See `.github/workflows/security.yml`.
 - **Reproducible base image** — `Dockerfile` pins `alpine:3.21` by digest instead of `alpine:latest`.
 - **Dependabot** — weekly updates for Go modules, Docker base image, and GitHub Actions.
+- **Multi-arch images** — published for `linux/amd64` and `linux/arm64` (Raspberry Pi, Apple Silicon, ARM cloud).
+- **Semver releases** — automated via [release-please](https://github.com/googleapis/release-please); every release has a git tag, a GitHub Release, and a `CHANGELOG.md` entry.
 
-Published to `ghcr.io/tikibozo/plex-oidc-bridge:latest`.
+### Images & tags
+
+Published to GitHub Container Registry: **`ghcr.io/tikibozo/plex-oidc-bridge`** (public, no auth needed to pull).
+
+| Tag        | Meaning                                                            |
+| ---------- | ------------------------------------------------------------------ |
+| `X.Y.Z`    | Immutable specific release (e.g. `0.5.0`)                          |
+| `X.Y`      | Latest patch of that minor (e.g. `0.5`)                            |
+| `X`        | Latest release of that major (e.g. `0`)                            |
+| `latest`   | Latest release                                                     |
+| `sha-<sha>`| Per-commit build from `main` (bleeding edge, not a release)        |
+
+**Recommended:** pin a specific release — ideally by digest — for reproducible deployments:
+
+```
+ghcr.io/tikibozo/plex-oidc-bridge:0.5.0@sha256:<digest>
+```
+
+Track `:0.5` or `:latest` if you'd rather pick up fixes on the next pull.
 
 ## IMPORTANT DISCLAIMERS
 1. This project is not affiliated with Plex, Inc. or Cloudflare, Inc. in any way. Use at your own risk. This software is provided "as is", without warranty of any kind.
@@ -223,4 +243,8 @@ The friend filter is an authentication-layer gate. Downstream apps should still 
 
 ## License
 
-MIT
+MIT — see [`LICENSE`](LICENSE). This fork preserves the upstream project's MIT
+licensing; copyright is held by the original author and the fork maintainer.
+
+See [`SECURITY.md`](SECURITY.md) for the security policy and how to report
+vulnerabilities.
