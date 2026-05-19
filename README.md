@@ -10,6 +10,7 @@ This is a fork of [`blacktirion/plex-oidc-bridge`](https://github.com/blacktirio
 - **Log-injection hardening** — `sanitizeForLog` now strips CR/LF/TAB in addition to truncating, preventing forged log lines via crafted `client_id` / `redirect_uri`.
 - **Security CI** — `govulncheck`, CodeQL (Go), `gitleaks`, `gosec`, `staticcheck`, and Trivy image scanning on push, PR, and weekly. See `.github/workflows/security.yml`.
 - **Reproducible base image** — `Dockerfile` pins `alpine:3.21` by digest instead of `alpine:latest`.
+- **Non-root runtime** — the container runs as a non-root user (uid/gid `10001`) instead of root, with a built-in `HEALTHCHECK` on the OIDC discovery endpoint. Bind-mounted config volumes must be writable by that uid — see the note under [Docker Deployment](#docker-deployment).
 - **Dependabot** — weekly updates for Go modules, Docker base image, and GitHub Actions.
 - **Multi-arch images** — published for `linux/amd64` and `linux/arm64` (Raspberry Pi, Apple Silicon, ARM cloud).
 - **Semver releases** — automated via [release-please](https://github.com/googleapis/release-please); every release has a git tag, a GitHub Release, and a `CHANGELOG.md` entry.
