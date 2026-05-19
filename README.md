@@ -109,6 +109,11 @@ services:
     restart: unless-stopped
 ```
 
+> **Non-root container:** the image runs as uid/gid **10001**, not root. If
+> you bind-mount the config directory (e.g. `./config:/app/config`), make it
+> writable by that user: `chown -R 10001:10001 ./config`. Named volumes work
+> without extra steps.
+
 ## First Run & Setup
 
 On the first run, the bridge will generate an OIDC Client ID and Secret if you don't provide them. 
