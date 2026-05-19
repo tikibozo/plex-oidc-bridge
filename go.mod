@@ -1,4 +1,4 @@
-module github.com/blacktirion/plex-oidc-bridge
+module github.com/tikibozo/plex-oidc-bridge
 
 go 1.25.10
 
