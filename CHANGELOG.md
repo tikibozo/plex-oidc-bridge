@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.1](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.0...v0.6.1) (2026-05-31)
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/golang-jwt/jwt/v5 to v5.3.1 ([#8](https://github.com/tikibozo/plex-oidc-bridge/issues/8)) ([ce5eb2b](https://github.com/tikibozo/plex-oidc-bridge/commit/ce5eb2bf7fc4c0fcc3ef561d8368b9e08a833c02))
+
 ## [0.6.0](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.5.1...v0.6.0) (2026-05-19)
 
 
