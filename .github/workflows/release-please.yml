@@ -36,10 +36,15 @@ jobs:
       - name: Enable auto-merge on the release PR
         if: ${{ steps.rp.outputs.pr != '' && env.RP_TOKEN != '' }}
         continue-on-error: true
+        # Parse the PR number with jq inside run, NOT fromJSON in env: GitHub
+        # evaluates step env expressions eagerly (even when `if` is false), so
+        # fromJSON('') throws on pushes where release-please opens no PR.
         env:
           GH_TOKEN: ${{ env.RP_TOKEN }}
-          PR_NUMBER: ${{ fromJSON(steps.rp.outputs.pr).number }}
-        run: gh pr merge "$PR_NUMBER" --repo "$GITHUB_REPOSITORY" --squash --auto
+          PR_JSON: ${{ steps.rp.outputs.pr }}
+        run: |
+          number=$(echo "$PR_JSON" | jq -r '.number')
+          gh pr merge "$number" --repo "$GITHUB_REPOSITORY" --squash --auto
 
   # Releases created by GITHUB_TOKEN do not trigger the `release` event,
   # so build/publish the versioned image here once a release is cut.
