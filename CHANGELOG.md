@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.2](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.1...v0.6.2) (2026-06-08)
+
+
+### Bug Fixes
+
+* rebuild image on Go 1.26.4 to remediate CVE-2026-42504 ([1b7eedc](https://github.com/tikibozo/plex-oidc-bridge/commit/1b7eedc1c86c4687697d38931935425bd9619ed5))
+
 ## [0.6.1](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.0...v0.6.1) (2026-05-31)
 
 
