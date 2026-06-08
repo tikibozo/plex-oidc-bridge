@@ -4,15 +4,18 @@
   "semanticCommitType": "fix",
   "timezone": "America/Los_Angeles",
   "schedule": ["* * * * 0"],
-  "automerge": false,
+  "automerge": true,
+  "platformAutomerge": true,
+  "automergeStrategy": "squash",
   "dependencyDashboard": true,
   "labels": ["renovate"],
   "packageRules": [
     {
-      "description": "Hold major updates for a few days and label them for review",
+      "description": "Hold major updates for review: label, soak, and never auto-merge",
       "matchUpdateTypes": ["major"],
       "addLabels": ["major"],
-      "minimumReleaseAge": "3 days"
+      "minimumReleaseAge": "3 days",
+      "automerge": false
     },
     {
       "description": "Batch GitHub Actions bumps into one PR",
@@ -23,6 +26,11 @@
       "description": "Keep the Go toolchain (go.mod) and the golang builder image in lockstep",
       "matchPackageNames": ["go", "golang"],
       "groupName": "golang"
+    },
+    {
+      "description": "Updates that change the shipped image (base images, Go toolchain/modules) land as fix(deps) so release-please cuts a release. config:recommended's :semanticPrefixFixDepsChoreOthers otherwise forces these to chore. github-actions stays chore (CI-only, no artifact change, no release).",
+      "matchManagers": ["dockerfile", "gomod"],
+      "semanticCommitType": "fix"
     }
   ]
 }
