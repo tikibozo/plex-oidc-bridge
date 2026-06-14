@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.3](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.2...v0.6.3) (2026-06-14)
+
+
+### Bug Fixes
+
+* **deps:** update alpine docker tag to v3.24 ([#21](https://github.com/tikibozo/plex-oidc-bridge/issues/21)) ([8507840](https://github.com/tikibozo/plex-oidc-bridge/commit/85078402233fd8141fc1f665a51d6d8360d220d6))
+
 ## [0.6.2](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.1...v0.6.2) (2026-06-08)
 
 
