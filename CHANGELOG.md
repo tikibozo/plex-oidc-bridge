@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.4](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.3...v0.6.4) (2026-06-14)
+
+
+### Bug Fixes
+
+* **deps:** update golang ([#15](https://github.com/tikibozo/plex-oidc-bridge/issues/15)) ([97f9683](https://github.com/tikibozo/plex-oidc-bridge/commit/97f968376f996b97c9aef61ef7adfcde3b8a7549))
+
 ## [0.6.3](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.2...v0.6.3) (2026-06-14)
 
 
