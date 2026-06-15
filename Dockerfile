@@ -20,6 +20,11 @@ RUN CGO_ENABLED=0 GOOS=linux go build -o plex-oidc-bridge .
 # Stage 2: Runtime
 FROM alpine:3.24@sha256:a2d49ea686c2adfe3c992e47dc3b5e7fa6e6b5055609400dc2acaeb241c829f4
 
+# Pull patched OS packages (e.g. libcrypto3/libssl3) from the Alpine repo. The
+# pinned base image lags fresh CVE fixes between Alpine's periodic rebuilds, so
+# upgrade in place to keep the Trivy gate green without unpinning the base.
+RUN apk upgrade --no-cache
+
 # Run as a non-root user. Fixed uid/gid 10001 so bind-mounted config
 # volumes can be chowned predictably: `chown -R 10001:10001 ./config`.
 RUN addgroup -g 10001 -S app \
