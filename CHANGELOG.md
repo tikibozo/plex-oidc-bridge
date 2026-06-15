@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.5](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.4...v0.6.5) (2026-06-15)
+
+
+### Bug Fixes
+
+* **security:** patch OpenSSL CVE-2026-45447 in base image ([#24](https://github.com/tikibozo/plex-oidc-bridge/issues/24)) ([82927cd](https://github.com/tikibozo/plex-oidc-bridge/commit/82927cd5859cd957a30236a0885a5647038402dd))
+
 ## [0.6.4](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.3...v0.6.4) (2026-06-14)
 
 
