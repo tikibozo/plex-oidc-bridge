@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.8](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.7...v0.6.8) (2026-07-27)
+
+
+### Bug Fixes
+
+* **deps:** update golang docker tag to v1.26.5 ([#32](https://github.com/tikibozo/plex-oidc-bridge/issues/32)) ([9406a2c](https://github.com/tikibozo/plex-oidc-bridge/commit/9406a2c13d61d7614c31d82dafa46fbb9b959a1e))
+
 ## [0.6.7](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.6...v0.6.7) (2026-06-22)
 
 
