@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.17](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.16...v0.6.17) (2026-11-01)
+
+
+### Bug Fixes
+
+* **deps:** update golang:1.27.3-alpine docker digest to d200d2d ([#56](https://github.com/tikibozo/plex-oidc-bridge/issues/56)) ([b6f4092](https://github.com/tikibozo/plex-oidc-bridge/commit/b6f4092bfab1f07d02e208883025607011e7ddbe))
+
 ## [0.6.16](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.15...v0.6.16) (2026-10-25)
 
 
