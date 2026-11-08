@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.19](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.18...v0.6.19) (2026-11-08)
+
+
+### Bug Fixes
+
+* **deps:** update alpine:3.24 docker digest to f59abe6 ([#61](https://github.com/tikibozo/plex-oidc-bridge/issues/61)) ([4f9f8fc](https://github.com/tikibozo/plex-oidc-bridge/commit/4f9f8fc4d5bb8269bf78e97f9c24090104772763))
+
 ## [0.6.18](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.17...v0.6.18) (2026-11-08)
 
 
