@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.6.18](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.17...v0.6.18) (2026-11-08)
+
+
+### Bug Fixes
+
+* **deps:** update alpine:3.24 docker digest to 3f4d6b3 ([#58](https://github.com/tikibozo/plex-oidc-bridge/issues/58)) ([7a84916](https://github.com/tikibozo/plex-oidc-bridge/commit/7a84916b4bf28ed85765dd899f93138eb8161f86))
+* **deps:** update golang:1.27.3-alpine docker digest to fa3d596 ([#59](https://github.com/tikibozo/plex-oidc-bridge/issues/59)) ([1b6a676](https://github.com/tikibozo/plex-oidc-bridge/commit/1b6a676f2e8da35c388feba0b41a9d223c4e459f))
+
 ## [0.6.17](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.16...v0.6.17) (2026-11-01)
 
 
