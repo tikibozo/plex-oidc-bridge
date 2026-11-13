@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.20](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.19...v0.6.20) (2026-11-13)
+
+
+### Bug Fixes
+
+* sanitize user-controlled values before logging ([#63](https://github.com/tikibozo/plex-oidc-bridge/issues/63)) ([ae92241](https://github.com/tikibozo/plex-oidc-bridge/commit/ae9224105f318058560debb7f623bcfc0cf8c5c5))
+
 ## [0.6.19](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.18...v0.6.19) (2026-11-08)
 
 
