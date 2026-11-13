@@ -21,6 +21,7 @@ import (
 	"strings"
 	"sync"
 	"time"
+	"unicode"
 
 	"crypto/x509"
 	"encoding/pem"
@@ -492,8 +493,15 @@ func clientIP(r *http.Request) string {
 }
 
 func sanitizeForLog(s string, max int) string {
+	// Neutralise line breaks first so user input can never forge a log entry.
+	// (Explicit ReplaceAll calls are also what CodeQL's go/log-injection
+	// query recognises as a sanitizer.)
+	s = strings.ReplaceAll(s, "\n", "_")
+	s = strings.ReplaceAll(s, "\r", "_")
+	// Then any remaining control characters (tabs, escape sequences, and
+	// Unicode line/paragraph separators).
 	s = strings.Map(func(r rune) rune {
-		if r == '\n' || r == '\r' || r == '\t' {
+		if unicode.IsControl(r) || r == '\u2028' || r == '\u2029' {
 			return '_'
 		}
 		return r
@@ -602,7 +610,7 @@ func handleAuthorize(w http.ResponseWriter, r *http.Request) {
 	}
 
 	canonRedirect, ok := canonicalizeRedirect(redirectURI)
-	log.Printf("/authorize request client_id=%s redirect_uri_clean=%s state_len=%d", oidcClientID, sanitizeForLog(canonRedirect, 256), len(state))
+	log.Printf("/authorize request client_id=%s redirect_uri_clean=%s state_len=%d", sanitizeForLog(oidcClientID, 64), sanitizeForLog(canonRedirect, 256), len(state))
 	if !ok {
 		http.Error(w, "Invalid redirect_uri", http.StatusBadRequest)
 		return
@@ -696,7 +704,7 @@ func handleToken(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Printf("/token request grant_type=%s client_id=%s redirect_uri=%s", grantType, sanitizeForLog(r.FormValue("client_id"), 64), sanitizeForLog(canonRedirect, 256))
+	log.Printf("/token request grant_type=%s client_id=%s redirect_uri=%s", sanitizeForLog(grantType, 32), sanitizeForLog(r.FormValue("client_id"), 64), sanitizeForLog(canonRedirect, 256))
 
 	// Validate Client
 	// 1. Check Basic Auth
