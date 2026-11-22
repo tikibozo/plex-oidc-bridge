@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.6.22](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.21...v0.6.22) (2026-11-22)
+
+
+### Bug Fixes
+
+* **deps:** update golang:1.27.4-alpine docker digest to 70bd7dd ([#67](https://github.com/tikibozo/plex-oidc-bridge/issues/67)) ([8511457](https://github.com/tikibozo/plex-oidc-bridge/commit/85114572d325b2b47d8072c6ac4ef14afa8da68e))
+
 ## [0.6.21](https://github.com/tikibozo/plex-oidc-bridge/compare/v0.6.20...v0.6.21) (2026-11-15)
 
 
